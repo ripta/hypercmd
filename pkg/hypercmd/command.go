@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // HyperCommand is a container of a root (the hypercommand command itself) and
@@ -51,6 +52,11 @@ func (h *HyperCommand) AddCommand(c *cobra.Command) {
 // Commands returns all the commands registered in the hypercommand.
 func (h *HyperCommand) Commands() []*cobra.Command {
 	return h.cmds
+}
+
+// Flags returns the complete root FlagSet.
+func (h *HyperCommand) Flags() *pflag.FlagSet {
+	return h.root.Flags()
 }
 
 // ImportCommands adds all subcommands of an existing command to the hypercommand.
