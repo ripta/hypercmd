@@ -46,6 +46,7 @@ func (opts *installOptions) run() error {
 		ln := path.Join(dir, cmd.Name())
 		if _, err := os.Stat(ln); err == nil {
 			fmt.Fprintf(os.Stderr, "Skip: symlink for %s already exists at %s\n", cmd.Name(), ln)
+			continue
 		}
 
 		if !opts.yes {
