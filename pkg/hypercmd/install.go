@@ -21,6 +21,7 @@ func InjectInstaller(hc *HyperCommand) *cobra.Command {
 			return opts.run()
 		},
 	}
+	cmd.Flags().BoolVarP(&opts.yes, "yes", "y", false, "Continue with installation")
 
 	hc.Root().AddCommand(cmd)
 	return cmd
@@ -45,6 +46,7 @@ func (opts *installOptions) run() error {
 		ln := path.Join(dir, cmd.Name())
 		if _, err := os.Stat(ln); err == nil {
 			fmt.Fprintf(os.Stderr, "Skip: symlink for %s already exists at %s\n", cmd.Name(), ln)
+			continue
 		}
 
 		if !opts.yes {
@@ -60,6 +62,9 @@ func (opts *installOptions) run() error {
 
 	if err := errors.Join(aggErr...); err != nil {
 		return fmt.Errorf("could not install one or more symlinks: %w", err)
+	}
+	if !opts.yes {
+		fmt.Fprintf(os.Stderr, "Dry-run: use -y or --yes to install the above symlinks\n")
 	}
 	return nil
 }
