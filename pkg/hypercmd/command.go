@@ -2,7 +2,6 @@ package hypercmd
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -18,13 +17,12 @@ type HyperCommand struct {
 
 // New initializes a new hypercommand to which commands can be added. An
 // "install" subcommand is already automatically added.
-func New() *HyperCommand {
+func New(name string) *HyperCommand {
 	h := &HyperCommand{}
 
-	binary := os.Args[0]
 	h.root = &cobra.Command{
-		Use:   binary,
-		Short: fmt.Sprintf("Run a command in %s", binary),
+		Use:   name,
+		Short: fmt.Sprintf("Run a command in %s", name),
 	}
 
 	_ = InjectInstaller(h)
@@ -56,21 +54,33 @@ func (h *HyperCommand) ImportCommands(c *cobra.Command) {
 	}
 }
 
+var ErrNoCommand = fmt.Errorf("no command found")
+
 // Resolve is given a name of a binary and uses it to return the correct command,
 // or the hypercommand otherwise.
-func (h *HyperCommand) Resolve(name string, withAliases bool) *cobra.Command {
+func (h *HyperCommand) Resolve(allArgs []string, withAliases bool) (*cobra.Command, error) {
+	name := allArgs[0]
+	if h.root.Name() == name {
+		return h.root, nil
+	}
+
+	// Reinject the root command name into the arguments, because (cobra.Command).Execute
+	// always traverses to the root before execution, even when we want a subcommand
+	h.root.SetArgs(allArgs)
+
 	name = filepath.Base(name)
 	for _, cmd := range h.cmds {
 		if cmd.Name() == name {
-			return cmd
+			return cmd, nil
 		}
 		if withAliases {
 			for _, alias := range cmd.Aliases {
 				if alias == name {
-					return cmd
+					return cmd, nil
 				}
 			}
 		}
 	}
-	return h.root
+
+	return nil, ErrNoCommand
 }
