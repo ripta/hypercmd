@@ -1,6 +1,7 @@
 package hypercmd
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -54,21 +55,21 @@ func (h *HyperCommand) ImportCommands(c *cobra.Command) {
 	}
 }
 
-var ErrNoCommand = fmt.Errorf("no command found")
+var ErrNoCommand = errors.New("no command found")
 
 // Resolve is given a name of a binary and uses it to return the correct command,
 // or the hypercommand otherwise.
 func (h *HyperCommand) Resolve(allArgs []string, withAliases bool) (*cobra.Command, error) {
-	name := allArgs[0]
+	name := filepath.Base(allArgs[0])
 	if h.root.Name() == name {
 		return h.root, nil
 	}
 
 	// Reinject the root command name into the arguments, because (cobra.Command).Execute
 	// always traverses to the root before execution, even when we want a subcommand
+	// (which we do, since we already know it's not the root).
 	h.root.SetArgs(allArgs)
 
-	name = filepath.Base(name)
 	for _, cmd := range h.cmds {
 		if cmd.Name() == name {
 			return cmd, nil
@@ -82,5 +83,5 @@ func (h *HyperCommand) Resolve(allArgs []string, withAliases bool) (*cobra.Comma
 		}
 	}
 
-	return nil, ErrNoCommand
+	return nil, fmt.Errorf("%w: %s (root is %s)", ErrNoCommand, name, h.root.Name())
 }
