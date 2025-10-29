@@ -1,6 +1,7 @@
 package hypercmd
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -12,6 +13,7 @@ type resolveTest struct {
 	args   []string
 	expCmd string
 	expErr error
+	expOut string
 }
 
 var resolveTests = []resolveTest{
@@ -82,6 +84,22 @@ var resolveTests = []resolveTest{
 		label:  "invoked with unknown subcommand",
 		args:   []string{"command_test", "unknown_subcommand"},
 		expCmd: "command_test",
+		expOut: "", // No output expected since it's a runtime error
+	},
+
+	{
+		// Invoking add as a symlinked binary should resolve to the add command.
+		label:  "invoked as 'add' symlink",
+		args:   []string{"add"},
+		expCmd: "add",
+		expOut: "adding numbers",
+	},
+	{
+		// Invoking multiply as a symlinked binary should resolve to the multiply command.
+		label:  "invoked as 'multiply' symlink",
+		args:   []string{"multiply"},
+		expCmd: "multiply",
+		expOut: "multiplying numbers",
 	},
 }
 
@@ -90,21 +108,23 @@ func TestResolve(t *testing.T) {
 	root.Root().SilenceErrors = true
 	root.Root().SilenceUsage = true
 
-	noop := func(_ *cobra.Command, _ []string) error {
-		return nil
-	}
-
 	add := &cobra.Command{
 		Use:   "add",
 		Short: "Add numbers together",
-		RunE:  noop,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			cmd.Println("adding numbers")
+			return nil
+		},
 	}
 	root.AddCommand(add)
 
 	multiply := &cobra.Command{
 		Use:   "multiply",
 		Short: "Multiply numbers together",
-		RunE:  noop,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			cmd.Println("multiplying numbers")
+			return nil
+		},
 	}
 	root.AddCommand(multiply)
 
@@ -123,6 +143,9 @@ func TestResolve(t *testing.T) {
 
 	for _, tt := range resolveTests {
 		t.Run(tt.label, func(t *testing.T) {
+			buf := bytes.Buffer{}
+			root.Root().SetOut(&buf)
+
 			cmd, err := root.Resolve(tt.args, true)
 			if err != nil {
 				assert.ErrorIs(t, err, tt.expErr)
@@ -130,6 +153,16 @@ func TestResolve(t *testing.T) {
 			}
 
 			assert.Equal(t, tt.expCmd, cmd.Name())
+
+			if tt.expOut == "" {
+				return
+			}
+
+			if err := cmd.Execute(); !assert.NoError(t, err) {
+				return
+			}
+
+			assert.Contains(t, buf.String(), tt.expOut)
 		})
 	}
 }
