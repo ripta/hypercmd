@@ -30,7 +30,8 @@ func New(name string) *HyperCommand {
 	return h
 }
 
-// AddCommand adds a new command to the hypercommand.
+// AddCommand adds a new command to the hypercommand. This makes it available
+// as a subcommand and as a symlinked binary when installed.
 func (h *HyperCommand) AddCommand(c *cobra.Command) {
 	h.root.AddCommand(c)
 	h.cmds = append(h.cmds, c)
