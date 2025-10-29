@@ -1,0 +1,63 @@
+# succeeds given no arguments
+exec testrunner
+stdout 'Run a command in testrunner'
+! stderr .
+
+# succeeds running version
+exec testrunner version
+! stdout .
+stderr 'testrunner version 1.0'
+
+# fails running unknown flag
+! exec testrunner --version
+! stdout .
+stderr 'Error: unknown flag: --version'
+
+# succeeds running add
+exec testrunner add
+stderr 'Sum: 0'
+
+# succeeds running add with arguments
+exec testrunner add 3 5 7
+stderr 'Sum: 15'
+
+# succeeds running add as standalone binary
+exec add
+stderr 'Sum: 0'
+
+# succeeds running add with arguments as standalone binary
+exec add 10 20 30
+stderr 'Sum: 60'
+
+# succeeds running multiply
+exec testrunner multiply
+stderr 'Product: 1'
+
+# succeeds running multiply with arguments
+exec testrunner multiply 2 3 4
+stderr 'Product: 24'
+
+# succeeds running multiply as standalone binary
+exec multiply
+stderr 'Product: 1'
+
+# succeeds running multiply with arguments as standalone binary
+exec multiply 5 6 7
+stderr 'Product: 210'
+
+# fails running unknown command
+! exec not_testrunner
+
+# fails running unknown subcommand
+! exec testrunner divide
+stderr 'Error: unknown command "divide" for "testrunner"'
+
+# succeeds running version under add subcommand
+exec testrunner add version
+! stdout .
+stderr 'testrunner version 1.0'
+
+# succeeds running version under multiply subcommand
+exec testrunner multiply version
+! stdout .
+stderr 'testrunner version 1.0'
