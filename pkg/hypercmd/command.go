@@ -65,6 +65,13 @@ func (h *HyperCommand) Resolve(allArgs []string, withAliases bool) (*cobra.Comma
 	if h.root.Name() == name {
 		return h.root, nil
 	}
+	if withAliases {
+		for _, alias := range h.root.Aliases {
+			if alias == name {
+				return h.root, nil
+			}
+		}
+	}
 
 	// Reinject the root command name into the arguments, because (cobra.Command).Execute
 	// always traverses to the root before execution, even when we want a subcommand

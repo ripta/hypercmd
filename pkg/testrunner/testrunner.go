@@ -9,18 +9,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RunCode() int {
-	if err := Run(); err != nil {
+func RunCode() {
+	if err := Run(false); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
-		return 1
 	}
 
-	return 0
+	os.Exit(0)
 }
 
-func Run() error {
+func RunCodeWithAliases() {
+	if err := Run(true); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+
+	os.Exit(0)
+}
+
+func Run(setAliases bool) error {
 	root := hypercmd.New("testrunner")
+	if setAliases {
+		root.Root().Aliases = []string{"testrunner.wasm", "testrunner.false"}
+	}
 	root.Root().SilenceErrors = true
 	root.Root().SilenceUsage = true
 
