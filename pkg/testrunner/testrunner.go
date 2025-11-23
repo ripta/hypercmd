@@ -9,24 +9,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RunCode() int {
+func RunCode() {
 	if err := Run(false); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
-		return 1
 	}
 
-	return 0
+	os.Exit(0)
 }
 
-func RunCodeWithAliases() int {
+func RunCodeWithAliases() {
 	if err := Run(true); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
-		return 1
 	}
 
-	return 0
+	os.Exit(0)
 }
 
 func Run(setAliases bool) error {

@@ -7,7 +7,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	testscript.RunMain(m, map[string]func() int{
+	testscript.Main(m, map[string]func(){
 		"testrunner": RunCode,
 		"add":        RunCode,
 		"multiply":   RunCode,
