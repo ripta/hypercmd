@@ -12,6 +12,9 @@ func TestMain(m *testing.M) {
 		"add":        RunCode,
 		"multiply":   RunCode,
 		"version":    RunCode,
+
+		"testrunner.false": RunCode,
+		"testrunner.wasm":  RunCodeWithAliases,
 	})
 }
 

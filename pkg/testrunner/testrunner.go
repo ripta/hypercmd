@@ -10,7 +10,7 @@ import (
 )
 
 func RunCode() int {
-	if err := Run(); err != nil {
+	if err := Run(false); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 		return 1
@@ -19,8 +19,21 @@ func RunCode() int {
 	return 0
 }
 
-func Run() error {
+func RunCodeWithAliases() int {
+	if err := Run(true); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+		return 1
+	}
+
+	return 0
+}
+
+func Run(setAliases bool) error {
 	root := hypercmd.New("testrunner")
+	if setAliases {
+		root.Root().Aliases = []string{"testrunner.wasm", "testrunner.false"}
+	}
 	root.Root().SilenceErrors = true
 	root.Root().SilenceUsage = true
 

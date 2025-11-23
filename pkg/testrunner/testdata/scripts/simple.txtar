@@ -3,6 +3,14 @@ exec testrunner
 stdout 'Run a command in testrunner'
 ! stderr .
 
+# succeeds running as alias
+exec testrunner.wasm
+stdout 'Run a command in testrunner'
+! stderr .
+
+# fails running as alias without alias support enabled
+! exec testrunner.false
+
 # succeeds running version
 exec testrunner version
 ! stdout .
