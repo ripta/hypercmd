@@ -61,3 +61,15 @@ stderr 'testrunner version 1.0'
 exec testrunner multiply version
 ! stdout .
 stderr 'testrunner version 1.0'
+
+# succeeds running bash shell completion on root
+exec testrunner completion bash
+stdout 'bash completion V2 for testrunner'
+! stderr .
+
+# fails running bash shell completion on add subcommand
+# we cannot have a completion command under add since it might conflict with
+# the subcommand's functionality
+! exec testrunner add completion bash
+! stdout .
+stderr 'Error: strconv.Atoi: parsing "completion": invalid syntax'
