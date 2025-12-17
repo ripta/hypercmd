@@ -14,6 +14,10 @@ updates:
         patterns:
           - '*'
         exclude-patterns:
+          # linkerd2 has broken versioning, causing 18.9.1+incompatible to get
+          # incorrectly selected every time
+          - 'github.com/linkerd/linkerd2'
+          # kubernetes libraries get upgraded together under the 'kubernetes' group
           - 'k8s.io/*'
           - 'sigs.k8s.io/*'
       kubernetes:
