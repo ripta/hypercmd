@@ -101,16 +101,32 @@ var resolveTests = []resolveTest{
 		expCmd: "multiply",
 		expOut: "multiplying numbers",
 	},
+
+	{
+		// Invoking a root alias should resolve to the root command.
+		label:  "invoked as root alias",
+		args:   []string{"command_test.wasm"},
+		expCmd: "command_test",
+	},
+	{
+		// Invoking a command alias should resolve to that command.
+		label:  "invoked as 'add' alias 'plus'",
+		args:   []string{"plus"},
+		expCmd: "add",
+		expOut: "adding numbers",
+	},
 }
 
 func TestResolve(t *testing.T) {
 	root := New("command_test")
+	root.Root().Aliases = []string{"command_test.wasm"}
 	root.Root().SilenceErrors = true
 	root.Root().SilenceUsage = true
 
 	add := &cobra.Command{
-		Use:   "add",
-		Short: "Add numbers together",
+		Use:     "add",
+		Short:   "Add numbers together",
+		Aliases: []string{"plus"},
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			cmd.Println("adding numbers")
 			return nil
@@ -165,4 +181,24 @@ func TestResolve(t *testing.T) {
 			assert.Contains(t, buf.String(), tt.expOut)
 		})
 	}
+}
+
+func TestImportCommands(t *testing.T) {
+	src := &cobra.Command{Use: "src"}
+	src.AddCommand(&cobra.Command{Use: "add"})
+	src.AddCommand(&cobra.Command{Use: "multiply"})
+
+	h := New("command_test")
+	h.ImportCommands(src)
+
+	names := []string{}
+	for _, cmd := range h.Commands() {
+		names = append(names, cmd.Name())
+	}
+
+	assert.ElementsMatch(t, []string{"add", "multiply"}, names)
+
+	cmd, err := h.Resolve([]string{"add"}, false)
+	assert.NoError(t, err)
+	assert.Equal(t, "add", cmd.Name())
 }
