@@ -103,6 +103,35 @@ var resolveTests = []resolveTest{
 	},
 
 	{
+		// A symlinked subcommand invoked by absolute path must still execute, not just resolve.
+		label:  "invoked as 'add' symlink via absolute path",
+		args:   []string{"/usr/local/bin/add"},
+		expCmd: "add",
+		expOut: "adding numbers",
+	},
+	{
+		// A symlinked subcommand invoked by relative path must still execute.
+		label:  "invoked as 'multiply' symlink via relative path",
+		args:   []string{"./multiply"},
+		expCmd: "multiply",
+		expOut: "multiplying numbers",
+	},
+	{
+		// A symlinked subcommand invoked by a relative directory path must still execute.
+		label:  "invoked as 'add' symlink via relative directory path",
+		args:   []string{"../bin/add"},
+		expCmd: "add",
+		expOut: "adding numbers",
+	},
+	{
+		// An alias symlink invoked by path must still execute, since cobra's "Find" resolves aliases when matching the first token.
+		label:  "invoked as 'add' alias 'plus' via absolute path",
+		args:   []string{"/usr/local/bin/plus"},
+		expCmd: "add",
+		expOut: "adding numbers",
+	},
+
+	{
 		// Invoking a root alias should resolve to the root command.
 		label:  "invoked as root alias",
 		args:   []string{"command_test.wasm"},
