@@ -76,7 +76,7 @@ func (h *HyperCommand) Resolve(allArgs []string, withAliases bool) (*cobra.Comma
 	// Reinject the root command name into the arguments, because (cobra.Command).Execute
 	// always traverses to the root before execution, even when we want a subcommand
 	// (which we do, since we already know it's not the root).
-	h.root.SetArgs(allArgs)
+	h.root.SetArgs(append([]string{name}, allArgs[1:]...))
 
 	for _, cmd := range h.cmds {
 		if cmd.Name() == name {

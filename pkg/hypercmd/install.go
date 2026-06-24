@@ -3,6 +3,7 @@ package hypercmd
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path"
 
@@ -41,7 +42,11 @@ func (opts *installOptions) run() error {
 	}
 
 	dir := path.Dir(target)
-	fmt.Fprintf(os.Stderr, "Installing %d symlinks to %s in %s\n", len(opts.hc.cmds), target, dir)
+	return opts.install(os.Stderr, target, dir)
+}
+
+func (opts *installOptions) install(w io.Writer, target, dir string) error {
+	fmt.Fprintf(w, "Installing %d symlinks to %s in %s\n", len(opts.hc.cmds), target, dir)
 
 	aggErr := []error{}
 	for _, cmd := range opts.hc.cmds {
@@ -51,15 +56,15 @@ func (opts *installOptions) run() error {
 		exists := statErr == nil
 
 		if exists && !opts.force {
-			fmt.Fprintf(os.Stderr, "Skip: symlink for %s already exists at %s (use -f to overwrite)\n", cmd.Name(), ln)
+			fmt.Fprintf(w, "Skip: symlink for %s already exists at %s (use -f to overwrite)\n", cmd.Name(), ln)
 			continue
 		}
 
 		if !opts.yes {
 			if exists {
-				fmt.Fprintf(os.Stderr, "Dry-run: would have overwritten symlink for %s at %s\n", cmd.Name(), ln)
+				fmt.Fprintf(w, "Dry-run: would have overwritten symlink for %s at %s\n", cmd.Name(), ln)
 			} else {
-				fmt.Fprintf(os.Stderr, "Dry-run: would have installed symlink for %s at %s\n", cmd.Name(), ln)
+				fmt.Fprintf(w, "Dry-run: would have installed symlink for %s at %s\n", cmd.Name(), ln)
 			}
 			continue
 		}
@@ -80,7 +85,7 @@ func (opts *installOptions) run() error {
 			aggErr = append(aggErr, err)
 			continue
 		}
-		fmt.Fprintf(os.Stderr, "Installed symlink for %s at %s\n", cmd.Name(), ln)
+		fmt.Fprintf(w, "Installed symlink for %s at %s\n", cmd.Name(), ln)
 	}
 
 	if err := errors.Join(aggErr...); err != nil {
@@ -88,9 +93,9 @@ func (opts *installOptions) run() error {
 	}
 	if !opts.yes {
 		if opts.force {
-			fmt.Fprintf(os.Stderr, "Dry-run: use -f -y to overwrite the above symlinks\n")
+			fmt.Fprintf(w, "Dry-run: use -f -y to overwrite the above symlinks\n")
 		} else {
-			fmt.Fprintf(os.Stderr, "Dry-run: use -y or --yes to install the above symlinks\n")
+			fmt.Fprintf(w, "Dry-run: use -y or --yes to install the above symlinks\n")
 		}
 	}
 	return nil
