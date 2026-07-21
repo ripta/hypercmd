@@ -51,9 +51,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+	os.Exit(hypercmd.ExitCode(cmd.Execute()))
 }
 ```
 
@@ -101,4 +99,19 @@ Adding numbers: [1 2 3]
 
 ❯ multiply 4 5 6
 Multiplying numbers: [4 5 6]
+```
+
+### Returning a specific exit code
+
+A command's `RunE` can only return an `error`, which `main` above turns into an exit
+code by calling `hypercmd.ExitCode`. A plain error becomes exit code 1. To request a
+different code, wrap the error with `hypercmd.Exit`:
+
+```go
+Run: func(cmd *cobra.Command, args []string) error {
+	if trouble {
+		return hypercmd.Exit(2, fmt.Errorf("something went wrong"))
+	}
+	return nil
+},
 ```
