@@ -10,21 +10,21 @@ import (
 )
 
 func RunCode() {
-	if err := Run(false); err != nil {
+	err := Run(false)
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
 	}
 
-	os.Exit(0)
+	os.Exit(hypercmd.ExitCode(err))
 }
 
 func RunCodeWithAliases() {
-	if err := Run(true); err != nil {
+	err := Run(true)
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
 	}
 
-	os.Exit(0)
+	os.Exit(hypercmd.ExitCode(err))
 }
 
 func Run(setAliases bool) error {
